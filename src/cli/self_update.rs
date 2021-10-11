@@ -159,8 +159,8 @@ The Cargo home directory located at:
 
 This can be modified with the CARGO_HOME environment variable.
 
-The `cargo`, `rustc`, `rustup` and other commands will be added to
-Cargo's bin directory, located at:
+The `cargo`, `rustc` and other commands will be added to Cargo's
+bin directory, located at:
 
     {cargo_home_bin}
 
@@ -679,7 +679,11 @@ fn install_bins() -> Result<()> {
     if rustup_path.exists() {
         utils::remove_file("rustup-bin", &rustup_path)?;
     }
-    utils::copy_file(&this_exe_path, &rustup_path)?;
+    if cfg!(feature = "no-self-update") {
+        utils::symlink_file(&this_exe_path, &rustup_path)?;
+    } else {
+        utils::copy_file(&this_exe_path, &rustup_path)?;
+    }
     utils::make_executable(&rustup_path)?;
     install_proxies()
 }
